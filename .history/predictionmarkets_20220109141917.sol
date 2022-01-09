@@ -170,20 +170,14 @@ contract PredictionMarket {
         emit Payout(msg.sender, amount);
     }
 
-    function withdraw() public {
-        require(block.timestamp > deadline);
-        require(msg.sender == owner);
-        require(result == Result.Open);
-
+    function withdraw () public payable {
         uint payout = balances[msg.sender];
         balances[msg.sender] = 0;
-        
         if (result == Result.Yes) {
             payout += shares[msg.sender] * 100;
             shares[msg.sender] = 0;
         }
-
-        payable (msg.sender).transfer(payout);
+        msg.sender.transfer(payout);
         emit Payout(msg.sender, payout);
     }
 

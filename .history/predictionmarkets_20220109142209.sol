@@ -175,15 +175,12 @@ contract PredictionMarket {
         require(msg.sender == owner);
         require(result == Result.Open);
 
-        uint payout = balances[msg.sender];
-        balances[msg.sender] = 0;
-        
+        uint payout = collateral;
         if (result == Result.Yes) {
             payout += shares[msg.sender] * 100;
             shares[msg.sender] = 0;
         }
-
-        payable (msg.sender).transfer(payout);
+        msg.sender).transfer(payout);
         emit Payout(msg.sender, payout);
     }
 

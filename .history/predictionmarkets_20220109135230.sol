@@ -116,18 +116,16 @@ contract PredictionMarket {
         require(order.orderType == OrderType.Buy);
         require(order.amount > 0);
         require(amount <= order.amount);
-        require(shares[msg.sender] >= amount);
-        require(msg.value > 0);
-        require(msg.value <= amount * order.price);
-
+        require(msg.value <= order.amount * order.price);
+        
+        amount = msg.value / order.price;
         uint fee = (amount * order.price) * TX_FEE_NUMERATOR / TX_FEE_DENOMINATOR;
         uint feeShares = amount * TX_FEE_NUMERATOR / TX_FEE_DENOMINATOR;
         
-        shares[msg.sender] -= amount;
-        shares[order.user] += (amount - feeShares);
+        shares[msg.sender] += (amount - feeShares);
         shares[owner] += feeShares;
         
-        balances[msg.sender] += (amount * order.price) - fee;
+        balances[order.user] += (amount * order.price) - fee;
         balances[owner] += fee;
         
         order.amount -= amount;
@@ -135,82 +133,6 @@ contract PredictionMarket {
             delete orders[orderId];
         
         emit TradeMatched(orderId, msg.sender, amount);
-    }
-
-    function cancelOrder (uint orderId) public {
-        Order storage order = orders[orderId];
-        
-        require(block.timestamp < deadline);
-        require(order.user == msg.sender);
-        require(order.orderType == OrderType.Buy);
-        require(order.amount > 0);
-        
-        if (order.orderType == OrderType.Buy) {
-            balances[msg.sender] += order.amount * order.price;
-        }
-        else{
-            shares[msg.sender] += order.amount;
-        }
-
-        delete orders[orderId];        
-        emit OrderCanceled(orderId);
-    }
-
-    function resolve (bool _result) public {
-        require(block.timestamp > deadline);
-        require(msg.sender == owner);
-        require(result == Result.Open);
-
-        result = _result ? Result.Yes : Result.No;
-        
-        if(result == Result.No)
-            balances[owner] += collateral;
-
-        uint amount = shares[msg.sender];
-        emit Payout(msg.sender, amount);
-    }
-
-    function withdraw() public {
-        require(block.timestamp > deadline);
-        require(msg.sender == owner);
-        require(result == Result.Open);
-
-        uint payout = balances[msg.sender];
-        balances[msg.sender] = 0;
-        
-        if (result == Result.Yes) {
-            payout += shares[msg.sender] * 100;
-            shares[msg.sender] = 0;
-        }
-
-        payable (msg.sender).transfer(payout);
-        emit Payout(msg.sender, payout);
-    }
-
-    function getResult() public view returns (Result) {
-        return result;
-    }
-
-    function getDeadline() public view returns (uint) {
-        return deadline;
-    }
-
-    function getCollateral() public view returns (uint) {
-        return collateral;
-    }
-
-    function getShares() public view returns (uint) {
-        return shares[msg.sender];
-    }
-
-    function getBalances() public view returns (uint) {
-        return balances[msg.sender];
-    }
-
-    function getOrder(uint orderId) public view returns (Order memory) {
-        Order storage order = orders[orderId];
-        require(order.user == msg.sender);
-        return order;
     }
 
 }

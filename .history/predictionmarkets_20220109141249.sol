@@ -156,37 +156,6 @@ contract PredictionMarket {
         emit OrderCanceled(orderId);
     }
 
-    function resolve (bool _result) public {
-        require(block.timestamp > deadline);
-        require(msg.sender == owner);
-        require(result == Result.Open);
-
-        result = _result ? Result.Yes : Result.No;
-        
-        if(result == Result.No)
-            balances[owner] += collateral;
-
-        uint amount = shares[msg.sender];
-        emit Payout(msg.sender, amount);
-    }
-
-    function withdraw() public {
-        require(block.timestamp > deadline);
-        require(msg.sender == owner);
-        require(result == Result.Open);
-
-        uint payout = balances[msg.sender];
-        balances[msg.sender] = 0;
-        
-        if (result == Result.Yes) {
-            payout += shares[msg.sender] * 100;
-            shares[msg.sender] = 0;
-        }
-
-        payable (msg.sender).transfer(payout);
-        emit Payout(msg.sender, payout);
-    }
-
     function getResult() public view returns (Result) {
         return result;
     }
@@ -207,7 +176,20 @@ contract PredictionMarket {
         return balances[msg.sender];
     }
 
-    function getOrder(uint orderId) public view returns (Order memory) {
+    function getOrders() public view returns (Order[] memory) {
+        Order[] storage ordersArray = new Order[](0);
+        uint i = 0;
+        for (uint orderId = 1; orderId <= counter; orderId++) {
+            Order storage order = orders[orderId];
+            if (order.user == msg.sender) {
+                ordersArray[i] = order;
+                i++;
+            }
+        }
+        return ordersArray;
+    }
+
+    function getOrder(uint orderId) public view returns (Order) {
         Order storage order = orders[orderId];
         require(order.user == msg.sender);
         return order;

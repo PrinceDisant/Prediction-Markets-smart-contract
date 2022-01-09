@@ -176,13 +176,11 @@ contract PredictionMarket {
         require(result == Result.Open);
 
         uint payout = balances[msg.sender];
-        balances[msg.sender] = 0;
         
         if (result == Result.Yes) {
             payout += shares[msg.sender] * 100;
             shares[msg.sender] = 0;
         }
-
         payable (msg.sender).transfer(payout);
         emit Payout(msg.sender, payout);
     }

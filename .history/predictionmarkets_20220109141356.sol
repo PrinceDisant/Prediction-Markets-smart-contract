@@ -156,35 +156,8 @@ contract PredictionMarket {
         emit OrderCanceled(orderId);
     }
 
-    function resolve (bool _result) public {
-        require(block.timestamp > deadline);
-        require(msg.sender == owner);
-        require(result == Result.Open);
-
-        result = _result ? Result.Yes : Result.No;
+    function resolve (bool_result) public {
         
-        if(result == Result.No)
-            balances[owner] += collateral;
-
-        uint amount = shares[msg.sender];
-        emit Payout(msg.sender, amount);
-    }
-
-    function withdraw() public {
-        require(block.timestamp > deadline);
-        require(msg.sender == owner);
-        require(result == Result.Open);
-
-        uint payout = balances[msg.sender];
-        balances[msg.sender] = 0;
-        
-        if (result == Result.Yes) {
-            payout += shares[msg.sender] * 100;
-            shares[msg.sender] = 0;
-        }
-
-        payable (msg.sender).transfer(payout);
-        emit Payout(msg.sender, payout);
     }
 
     function getResult() public view returns (Result) {
