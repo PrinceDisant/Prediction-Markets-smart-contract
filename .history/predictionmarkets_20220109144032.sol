@@ -63,8 +63,9 @@ contract PredictionMarket {
 
     /*
     * @dev Allows the owner to buy orders
-    * @param _price The price per share
-    */
+    * @param _orderType The type of order (Buy or Sell)
+    * @param _amount The amount of shares to buy
+    
         function orderBuy (uint price) public payable {
         require(block.timestamp < deadline);
         require(msg.value > 0);
@@ -77,11 +78,6 @@ contract PredictionMarket {
         emit OrderPlaced(counter, msg.sender, OrderType.Buy, amount, price);
     }
 
-    /* 
-    * @dev Allows the owner to sell orders
-    * @param _price The price per share
-    * @param _amount The amount of shares to sell
-    */
     function orderSell (uint price, uint amount) public payable {
         require(block.timestamp < deadline);
         require(shares[msg.sender] >= amount);
@@ -97,10 +93,6 @@ contract PredictionMarket {
         emit OrderPlaced(counter, msg.sender, OrderType.Sell, amount, price);
     }
     
-    /*
-    @dev Allows the owner to trade orders
-    @param _orderId The order id of the order to trade
-    */
     function tradeBuy (uint orderId) public payable {
         Order storage order = orders[orderId];
         

@@ -52,6 +52,7 @@ contract PredictionMarket {
     * @param _deadline The deadline of the prediction market
     * @param _collateral The collateral required to participate in the prediction market
     */
+
     constructor(uint duration) payable {
         require(msg.value > 0);
 
@@ -62,10 +63,10 @@ contract PredictionMarket {
     }
 
     /*
-    * @dev Allows the owner to buy orders
-    * @param _price The price per share
+    * @dev Allows the owner to set the result of the prediction market
+    * @param _result The result of the prediction market
     */
-        function orderBuy (uint price) public payable {
+    function orderBuy (uint price) public payable {
         require(block.timestamp < deadline);
         require(msg.value > 0);
         require(price >= 0);
@@ -77,11 +78,9 @@ contract PredictionMarket {
         emit OrderPlaced(counter, msg.sender, OrderType.Buy, amount, price);
     }
 
-    /* 
-    * @dev Allows the owner to sell orders
-    * @param _price The price per share
-    * @param _amount The amount of shares to sell
-    */
+    /*
+    * @dev Allows the owner to set the result of the prediction market
+    
     function orderSell (uint price, uint amount) public payable {
         require(block.timestamp < deadline);
         require(shares[msg.sender] >= amount);
@@ -96,11 +95,7 @@ contract PredictionMarket {
         
         emit OrderPlaced(counter, msg.sender, OrderType.Sell, amount, price);
     }
-    
-    /*
-    @dev Allows the owner to trade orders
-    @param _orderId The order id of the order to trade
-    */
+
     function tradeBuy (uint orderId) public payable {
         Order storage order = orders[orderId];
         
@@ -128,12 +123,6 @@ contract PredictionMarket {
         emit TradeMatched(orderId, msg.sender, amount);
     }
 
-    /*
-     * @dev Trade a sell order for shares
-     * @param orderId The id of the sell order
-     * @param amount The amount of shares to trade
-     * @return The amount of shares traded
-     */
     function tradeSell (uint orderId, uint amount) public payable {
         Order storage order = orders[orderId];
         
@@ -163,10 +152,6 @@ contract PredictionMarket {
         emit TradeMatched(orderId, msg.sender, amount);
     }
 
-    /*
-    * @dev Cancels an order
-    * @param orderId The order to cancel
-    */
     function cancelOrder (uint orderId) public {
         Order storage order = orders[orderId];
         
@@ -186,10 +171,6 @@ contract PredictionMarket {
         emit OrderCanceled(orderId);
     }
 
-    
-    /*
-    * @dev resolves the prediction market
-    */
     function resolve (bool _result) public {
         require(block.timestamp > deadline);
         require(msg.sender == owner);
@@ -204,9 +185,6 @@ contract PredictionMarket {
         emit Payout(msg.sender, amount);
     }
 
-    /*
-    * @dev withdraws the payout
-    */
     function withdraw() public {
         require(block.timestamp > deadline);
         require(msg.sender == owner);
@@ -223,50 +201,27 @@ contract PredictionMarket {
         payable (msg.sender).transfer(payout);
         emit Payout(msg.sender, payout);
     }
-    /*
-    * @dev Returns the result of the prediction market
-    * @return Result The result of the prediction market
-    */
+
     function getResult() public view returns (Result) {
         return result;
     }
-    
-    /*
-    * @dev Returns the deadline of the prediction market
-    * @return uint The deadline of the prediction market
-    */
+
     function getDeadline() public view returns (uint) {
         return deadline;
     }
 
-    /*
-    * @dev Returns the collateral required to participate in the prediction market
-    * @return uint The collateral required to participate in the prediction market
-    */
     function getCollateral() public view returns (uint) {
         return collateral;
     }
 
-    /*
-    * @dev Returns the amount of shares owned by the sender
-    * @return uint The amount of shares owned by the sender
-    */
     function getShares() public view returns (uint) {
         return shares[msg.sender];
     }
 
-    /*
-    * @dev Returns the balance of the sender
-    * @return uint The balance of the sender
-    */
     function getBalances() public view returns (uint) {
         return balances[msg.sender];
     }
 
-    /*
-    * @dev Returns the order book
-    * @return Order[] The order book
-    */
     function getOrder(uint orderId) public view returns (Order memory) {
         Order storage order = orders[orderId];
         require(order.user == msg.sender);

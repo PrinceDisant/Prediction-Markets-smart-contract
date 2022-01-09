@@ -99,8 +99,7 @@ contract PredictionMarket {
     
     /*
     @dev Allows the owner to trade orders
-    @param _orderId The order id of the order to trade
-    */
+    
     function tradeBuy (uint orderId) public payable {
         Order storage order = orders[orderId];
         
